@@ -1,0 +1,2 @@
+# IdleMiner
+Mining idly
