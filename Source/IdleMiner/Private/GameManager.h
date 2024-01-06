@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BuildingBase.h"
-#include "GameSlot.h"
+//#include "GameSlot.h"
 #include "GameManager.generated.h"
 
 
@@ -33,6 +33,62 @@ struct FSBuildingProcess
 	TArray< TEnumAsByte<EResource>> Needs;
 
 };
+
+USTRUCT(Blueprintable)
+struct FSGridPosition
+{
+	GENERATED_USTRUCT_BODY();
+
+	FSGridPosition() {}
+	FSGridPosition(int xPos, int yPos) : XPos(xPos), YPos(yPos) {}
+
+	UPROPERTY(EditAnywhere)
+	int XPos;
+
+	UPROPERTY(EditAnywhere)
+	int YPos;
+
+	static FSGridPosition GetPositionInGrid(FVector origin, FVector location, float GridSize)
+	{
+		FVector targetVector = location - origin;
+		targetVector.X = FMath::GridSnap(targetVector.X, GridSize);
+		targetVector.Y = FMath::GridSnap(targetVector.Y, GridSize);
+
+		return FSGridPosition((int)(targetVector.X / GridSize), (int)(targetVector.Y / GridSize));
+	}
+	static bool Compare(FSGridPosition first, FSGridPosition second)
+	{
+		return first.XPos == second.XPos && first.YPos == second.YPos;
+	}
+};
+
+USTRUCT(Blueprintable)
+struct FSPlacedBuilding
+{
+	GENERATED_USTRUCT_BODY();
+
+	FSPlacedBuilding() {}
+	FSPlacedBuilding(ABuildingBase* building, FSGridPosition position) : Building(building), Position(position) {}
+	FSPlacedBuilding(ABuildingBase* building, int xPos, int yPos)
+	{
+		Building = building;
+		Position = FSGridPosition(xPos, yPos);
+	}
+
+	UPROPERTY(EditAnywhere)
+	ABuildingBase* Building;
+
+	UPROPERTY(EditAnywhere)
+	FSGridPosition Position;
+};
+
+//UENUM(Blueprintable)
+//enum EGridState
+//{
+//	GS_Default,
+//	GS_Highlighted,
+//	GS_Occupied
+//};
 
 UCLASS()
 class AGameManager : public AActor
@@ -66,15 +122,20 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere)
+	float GridSize;
+
+	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<ABuildingBase>> UsableBuildings;
 
 	UPROPERTY(VisibleAnywhere)
 	TSubclassOf<ABuildingBase> CurrentBuilding;
 
 	UPROPERTY(VisibleAnywhere)
-	TArray<ABuildingBase*> PlacedBuildings;
+	TArray<FSPlacedBuilding> PlacedBuildings;
 
-	UStaticMeshComponent* DisplayMesh;
+	UStaticMeshComponent* BuildingPreviewMesh;
+
+	UStaticMeshComponent* GridIndicatorMesh;
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* GhostMaterial;
@@ -86,9 +147,9 @@ public:
 
 	void GatherResources();
 
-private:
+	static AGameManager* Instance;
 
-	AGameSlot* OldGameSlot;
+private:
 
 	FTimerHandle GatherHandle;
 };

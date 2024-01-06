@@ -3,7 +3,6 @@
 
 #include "Building_PlayerController.h"
 #include "DrawDebugHelpers.h"
-#include "GameManager.h"
 
 void ABuilding_PlayerController::BeginPlay()
 {
@@ -25,7 +24,7 @@ void ABuilding_PlayerController::Tick(float DeltaTime)
 		{
 			AActor* HitActor = HitResult.GetActor();
 
-			GameManagerReference->SendMouseTrace(HitActor, HitResult.Location, PlayerInput->IsPressed(EKeys::LeftMouseButton));
+			AGameManager::Instance->SendMouseTrace(HitActor, HitResult.Location, PlayerInput->IsPressed(EKeys::LeftMouseButton));
 		}
 	}
 	else

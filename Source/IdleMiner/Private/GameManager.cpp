@@ -4,6 +4,8 @@
 #include "GameManager.h"
 #include "Building_PlayerController.h"
 
+AGameManager* AGameManager::Instance = nullptr;
+
 // Sets default values
 AGameManager::AGameManager()
 {
@@ -12,11 +14,20 @@ AGameManager::AGameManager()
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
-	DisplayMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Display"));
-	DisplayMesh->SetupAttachment(RootComponent);
-	DisplayMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BuildingPreviewMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BuildingPreview"));
+	BuildingPreviewMesh->SetupAttachment(RootComponent);
+	BuildingPreviewMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	OldGameSlot = nullptr;
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> DefaultSlotMesh(TEXT("/Engine/BasicShapes/Plane"));
+
+	GridIndicatorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GridIndicator"));
+	GridIndicatorMesh->SetupAttachment(RootComponent);
+	GridIndicatorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GridIndicatorMesh->SetStaticMesh(DefaultSlotMesh.Object);
+
+	Instance = this;
+
+	//OldGameSlot = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -28,15 +39,10 @@ void AGameManager::BeginPlay()
 	{
 		CurrentBuilding = UsableBuildings[0];
 		UStaticMesh* tempMesh = CurrentBuilding.GetDefaultObject()->Mesh->GetStaticMesh();
-		DisplayMesh->SetStaticMesh(tempMesh);
-		DisplayMesh->SetMaterial(0, GhostMaterial);
+		BuildingPreviewMesh->SetStaticMesh(tempMesh);
+		BuildingPreviewMesh->SetMaterial(0, GhostMaterial);
 	}
 	else CurrentBuilding = nullptr;
-	
-	if (auto PlayerController = Cast<ABuilding_PlayerController>(GWorld->GetFirstPlayerController()))
-	{
-		PlayerController->GameManagerReference = this;
-	}
 
 	GatherResources();
 }
@@ -49,48 +55,28 @@ void AGameManager::Tick(float DeltaTime)
 
 void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPressed)
 {
+	FVector TargetLocation = FVector(Location.X, Location.Y, GetActorLocation().Z);
+
+	FVector SnappedLocation = TargetLocation;
+	SnappedLocation.X = FMath::GridSnap(SnappedLocation.X, GridSize);
+	SnappedLocation.Y = FMath::GridSnap(SnappedLocation.Y, GridSize);
+
 	if (CurrentBuilding != nullptr)
-		DisplayMesh->SetWorldLocation(Location);
-
-	if (auto HitSlot = Cast<AGameSlot>(HitActor))
 	{
-		if (OldGameSlot == nullptr)
-		{
-			if (HitSlot->GetState() == EGridState::GS_Default)
-				HitSlot->SetState(GS_Highlighted);
-		}
-		else if (OldGameSlot != HitSlot)
-		{
-			if (HitSlot->GetState() == EGridState::GS_Default)
-				HitSlot->SetState(GS_Highlighted);
-
-			if (OldGameSlot->GetState() == EGridState::GS_Highlighted)
-				OldGameSlot->SetState(GS_Default);
-		}
-
-		if (IsPressed)
-		{
-			if (HitSlot->GetState() != EGridState::GS_Occupied)
-			{
-				FActorSpawnParameters SpawnInfo;
-				FVector SpawnLocation = HitSlot->GetActorLocation();
-				FRotator SpawnRotation = FRotator(0, 0, 0);
-
-				TSubclassOf<AActor> actor = CurrentBuilding;
-
-				ABuildingBase* SpawnedRef = GetWorld()->SpawnActor<ABuildingBase>(CurrentBuilding, SpawnLocation, SpawnRotation, SpawnInfo);
-				PlacedBuildings.Add(SpawnedRef);
-
-				HitSlot->SetState(EGridState::GS_Occupied);
-			}
-		}
-
-		OldGameSlot = HitSlot;
+		BuildingPreviewMesh->SetWorldLocation(TargetLocation);
 	}
-	else if ((OldGameSlot != nullptr && OldGameSlot->GetState() == EGridState::GS_Highlighted))
+	GridIndicatorMesh->SetWorldLocation(SnappedLocation);
+
+	if (IsPressed)
 	{
-		OldGameSlot->SetState(GS_Default);
-		OldGameSlot = nullptr;
+		FSGridPosition gridPos = FSGridPosition::GetPositionInGrid(GetActorLocation(), SnappedLocation, GridSize);
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, FString::Printf(TEXT("%ix%i"), gridPos.XPos, gridPos.YPos));
+
+		bool canPlace = false;
+		for (FSPlacedBuilding building : PlacedBuildings)
+		{
+			//building.Position
+		}
 	}
 
 	//DrawDebugPoint(GetWorld(), Location, 100, FColor::Red);
