@@ -21,4 +21,35 @@ AGameSlot::AGameSlot()
 	Plane = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Plane"));
 	Plane->SetupAttachment(RootComponent);
 	Plane->SetStaticMesh(DefaultSlotMesh.Object);
+
+	SetState(GS_Default);
+}
+
+void AGameSlot::SetState(EGridState NewState)
+{
+	GridState = NewState;
+
+	//static ConstructorHelpers::FObjectFinder<UMaterialInstance> DefaultSlotMaterial(TEXT("'/Game/Materials/MI_GameSlot_Normal.MI_GameSlot_Normal'"));
+	//static ConstructorHelpers::FObjectFinder<UMaterialInstance> DefaultSlotMaterial_H(TEXT("'/Game/Materials/MI_GameSlot_Highlighted.MI_GameSlot_Highlighted'"));
+	//static ConstructorHelpers::FObjectFinder<UMaterialInstance> DefaultSlotMaterial_O(TEXT("'/Game/Materials/MI_GameSlot_Highlighted.MI_GameSlot_Highlighted'"));
+
+	switch (NewState)
+	{
+	case GS_Default:
+		Plane->SetMaterial(0, NormalMaterial);
+		break;
+	case GS_Highlighted:
+		Plane->SetMaterial(0, HighlightedMaterial);
+		break;
+	case GS_Occupied:
+		Plane->SetMaterial(0, OccupiedMaterial);
+		break;
+	}
+
+	//GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, FString::Printf(TEXT("%i"), (int)NewState));
+}
+
+EGridState AGameSlot::GetState()
+{
+	return GridState;
 }

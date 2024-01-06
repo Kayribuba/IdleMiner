@@ -28,8 +28,7 @@ enum EGridState
 {
 	GS_Default,
 	GS_Highlighted,
-	GS_Offensive,
-	GS_Supportive,
+	GS_Occupied
 };
 
 
@@ -44,6 +43,15 @@ public:
 
 
 	UPROPERTY(EditAnywhere)
+	UMaterialInterface* NormalMaterial;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* HighlightedMaterial;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* OccupiedMaterial;
+
+	UPROPERTY(EditAnywhere)
 	UBoxComponent* Box;
 
 	UPROPERTY(EditAnywhere)
@@ -51,6 +59,12 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	FSGridPosition GridPosition;
+
+	UFUNCTION()
+	void SetState(EGridState NewState);
+
+	UFUNCTION()
+	EGridState GetState();
 
 private:
 	EGridState GridState;
