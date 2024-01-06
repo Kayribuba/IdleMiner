@@ -48,6 +48,12 @@ struct FSGridPosition
 	UPROPERTY(EditAnywhere)
 	int YPos;
 
+	FVector ToFVector()
+	{
+		return FVector(XPos, YPos, 0);
+	}
+
+
 	static FSGridPosition GetPositionInGrid(FVector origin, FVector location, float GridSize)
 	{
 		FVector targetVector = location - origin;

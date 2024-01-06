@@ -70,12 +70,28 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 	if (IsPressed)
 	{
 		FSGridPosition gridPos = FSGridPosition::GetPositionInGrid(GetActorLocation(), SnappedLocation, GridSize);
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, FString::Printf(TEXT("%ix%i"), gridPos.XPos, gridPos.YPos));
 
-		bool canPlace = false;
+		bool canPlace = true;
 		for (FSPlacedBuilding building : PlacedBuildings)
 		{
-			//building.Position
+			if (FSGridPosition::Compare(building.Position, gridPos))
+			{
+				canPlace = false;
+				break;
+			}
+		}
+
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, 
+			FString::Printf(TEXT("%ix%i %s"), gridPos.XPos, gridPos.YPos, canPlace ? TEXT("NOT Occupied") : TEXT("IS Occupied")));
+
+		if (canPlace)
+		{
+			FActorSpawnParameters SpawnInfo;
+			FVector SpawnLocation = SnappedLocation;
+			FRotator SpawnRotation = FRotator(0, 0, 0);
+
+			ABuildingBase* SpawnedRef = GetWorld()->SpawnActor<ABuildingBase>(CurrentBuilding, SpawnLocation, SpawnRotation, SpawnInfo);
+			PlacedBuildings.Add(FSPlacedBuilding(SpawnedRef, gridPos));
 		}
 	}
 
