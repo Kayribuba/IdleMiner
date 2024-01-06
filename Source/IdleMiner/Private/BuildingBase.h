@@ -7,6 +7,35 @@
 #include "Components/BoxComponent.h"
 #include "BuildingBase.generated.h"
 
+UENUM(Blueprintable)
+enum EResource
+{
+	R_None,
+	R_Coin,
+	R_Copper,
+	R_Iron,
+	R_Gold
+};
+
+USTRUCT(BlueprintType)
+struct FSBuildingProcess
+{
+	GENERATED_USTRUCT_BODY();
+
+	FSBuildingProcess() {}
+	FSBuildingProcess(TEnumAsByte<EResource> type, int count) : Type(type)
+	{
+		Count = FMath::Max(0, count);
+	}
+
+	UPROPERTY(EditAnywhere)
+	int Count;
+
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EResource> Type;
+
+};
+
 UCLASS()
 class ABuildingBase : public AActor
 {
@@ -15,6 +44,15 @@ class ABuildingBase : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ABuildingBase();
+
+	UPROPERTY(EditAnywhere)
+	TArray<FSBuildingProcess> BuildCosts;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FSBuildingProcess> GainsPerClock;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FSBuildingProcess> NeedsPerClock;
 
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* Box;

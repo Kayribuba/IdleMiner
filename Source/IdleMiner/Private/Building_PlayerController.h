@@ -11,6 +11,7 @@
 /**
  * 
  */
+
 UCLASS()
 class ABuilding_PlayerController : public APlayerController
 {
@@ -21,4 +22,5 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
+
 };

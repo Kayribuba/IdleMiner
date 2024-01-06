@@ -9,31 +9,6 @@
 #include "GameManager.generated.h"
 
 
-UENUM(Blueprintable)
-enum EResource
-{
-	R_Coin,
-	R_Copper,
-	R_Iron,
-	R_Gold
-};
-
-USTRUCT(Blueprintable)
-struct FSBuildingProcess
-{
-	GENERATED_USTRUCT_BODY();
-
-	FSBuildingProcess() {}
-	FSBuildingProcess(TArray< TEnumAsByte<EResource>> gains, TArray< TEnumAsByte<EResource>> needs) : Gains(gains), Needs(needs){}
-
-	UPROPERTY(EditAnywhere)
-	TArray< TEnumAsByte<EResource>> Gains;
-
-	UPROPERTY(EditAnywhere)
-	TArray< TEnumAsByte<EResource>> Needs;
-
-};
-
 USTRUCT(Blueprintable)
 struct FSGridPosition
 {
@@ -88,14 +63,6 @@ struct FSPlacedBuilding
 	FSGridPosition Position;
 };
 
-//UENUM(Blueprintable)
-//enum EGridState
-//{
-//	GS_Default,
-//	GS_Highlighted,
-//	GS_Occupied
-//};
-
 UCLASS()
 class AGameManager : public AActor
 {
@@ -112,17 +79,7 @@ protected:
 public:
 
 	UPROPERTY(VisibleAnywhere)
-	int Count_Coin;
-
-	UPROPERTY(VisibleAnywhere)
-	int Count_Copper;
-
-	UPROPERTY(VisibleAnywhere)
-	int Count_Iron;
-
-	UPROPERTY(VisibleAnywhere)
-	int Count_Gold;
-
+	TMap<TEnumAsByte<EResource>, int> ResourceCounts;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -153,9 +110,17 @@ public:
 
 	void GatherResources();
 
+	bool DoesHaveResources(FSBuildingProcess process);
+
+	void AddResources(FSBuildingProcess process);
+
+	bool TryRemoveResources(FSBuildingProcess process);
+
 	static AGameManager* Instance;
 
 private:
 
 	FTimerHandle GatherHandle;
+
+	bool WasM0Pressed;
 };
