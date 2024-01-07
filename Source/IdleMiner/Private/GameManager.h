@@ -78,7 +78,7 @@ protected:
 
 public:
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	TMap<TEnumAsByte<EResource>, int> ResourceCounts;
 
 	// Called every frame
@@ -90,7 +90,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<ABuildingBase>> UsableBuildings;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABuildingBase> CurrentBuilding;
 
 	UPROPERTY(VisibleAnywhere)

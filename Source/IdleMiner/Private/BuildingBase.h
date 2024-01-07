@@ -55,6 +55,9 @@ public:
 	TArray<FSBuildingProcess> NeedsPerClock;
 
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<ABuildingBase> BuildingToPlaceOver;
+
+	UPROPERTY(EditAnywhere)
 	UBoxComponent* Box;
 
 	UPROPERTY(EditAnywhere)

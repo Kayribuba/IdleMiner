@@ -13,13 +13,6 @@ AGameManager::AGameManager() :
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	ResourceCounts.Empty();
-	ResourceCounts.Add(EResource::R_Coin, 0);
-	ResourceCounts.Add(EResource::R_Copper, 0);
-	ResourceCounts.Add(EResource::R_Iron, 0);
-	ResourceCounts.Add(EResource::R_Gold, 0);
-
-
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
 	BuildingPreviewMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BuildingPreview"));
@@ -57,8 +50,6 @@ void AGameManager::BeginPlay()
 	else CurrentBuilding = nullptr;
 
 	GatherResources();
-
-	ResourceCounts[EResource::R_Copper] = 10;
 }
 
 // Called every frame
@@ -86,13 +77,45 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 		FSGridPosition gridPos = FSGridPosition::GetPositionInGrid(GetActorLocation(), SnappedLocation, GridSize);
 
 		bool canPlace = true;
-		for (FSPlacedBuilding building : PlacedBuildings)
+		bool replace = false;
+		int OccupyingBuildingIndex = -1;
+		TSubclassOf<ABuildingBase> PlacedBuildingClass = nullptr;
+
+		for (int i = 0; i < PlacedBuildings.Num(); i++)
 		{
+			FSPlacedBuilding building = PlacedBuildings[i];
+
 			if (FSGridPosition::Compare(building.Position, gridPos))
 			{
-				canPlace = false;
+				OccupyingBuildingIndex = i;
+				PlacedBuildingClass = building.Building->GetClass();
 				break;
 			}
+		}
+
+		if (CurrentBuilding.GetDefaultObject()->BuildingToPlaceOver == nullptr)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, TEXT("Replace is null"));
+
+			if (OccupyingBuildingIndex != -1)
+			{
+				canPlace = false;
+			}
+		}
+		else if (OccupyingBuildingIndex != -1)
+		{
+			if (PlacedBuildingClass != CurrentBuilding.GetDefaultObject()->BuildingToPlaceOver)
+			{
+				canPlace = false;
+			}
+			else
+			{
+				replace = true;
+			}
+		}
+		else
+		{
+			canPlace = false;
 		}
 
 		if (canPlace)//check build cost if still can place
@@ -121,7 +144,16 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 			FRotator SpawnRotation = FRotator(0, 0, 0);
 
 			ABuildingBase* SpawnedRef = GetWorld()->SpawnActor<ABuildingBase>(CurrentBuilding, SpawnLocation, SpawnRotation, SpawnInfo);
-			PlacedBuildings.Add(FSPlacedBuilding(SpawnedRef, gridPos));
+
+			if (replace)
+			{
+				PlacedBuildings[OccupyingBuildingIndex].Building->Destroy();
+				PlacedBuildings[OccupyingBuildingIndex] = FSPlacedBuilding(SpawnedRef, gridPos);
+			}
+			else
+			{
+				PlacedBuildings.Add(FSPlacedBuilding(SpawnedRef, gridPos));
+			}
 		}
 	}
 
