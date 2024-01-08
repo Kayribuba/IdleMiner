@@ -44,7 +44,7 @@ void AFloatingCharacterController::BeginPlay()
 void AFloatingCharacterController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, FString::Printf(TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed));
 }
 
 // Called to bind functionality to input
@@ -57,7 +57,7 @@ void AFloatingCharacterController::SetupPlayerInputComponent(UInputComponent* Pl
 
 	PlayerInputComponent->BindAxis("CloseDistance", this, &AFloatingCharacterController::ZoomIn);
 
-	PlayerInputComponent->BindAction("Haste", IE_Released, this, &AFloatingCharacterController::HastePressed);
+	PlayerInputComponent->BindAction("Haste", IE_Pressed, this, &AFloatingCharacterController::HastePressed);
 	PlayerInputComponent->BindAction("Haste", IE_Released, this, &AFloatingCharacterController::HasteReleased);
 }
 
@@ -73,20 +73,32 @@ void AFloatingCharacterController::MoveEast(float Amount)
 
 void AFloatingCharacterController::ZoomIn(float Amount)
 {
-	SetActorLocation(GetActorLocation().operator+(FVector(0,0, Amount*50)), false);
+	SetActorLocation(FMath::Clamp(GetActorLocation().operator+(FVector(0,0, Amount*50).Z), MaxCameraDistance, MinCameraDistance), false);
 	
-	//FMath::Clamp(GetActorLocation().ZAxisVector, MinCameraDistance, MaxCameraDistance);
+	//FMath::Clamp(GetActorLocation().Z, MaxCameraDistance, MinCameraDistance);
+	FMath::Clamp(SetActorLocation(GetActorLocation().operator+(FVector(0, 0, Amount * 50)), false), MaxCameraDistance, MinCameraDistance);
+	
+	
+
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, FString::Printf(TEXT("%f"), GetActorLocation().Z));
+
 	//FMath::Clamp(MyFloat, 0.0f, 100.0f)
 }
 
 
 void AFloatingCharacterController::HastePressed()
 {
-	CameraSpeed *= 1.5f;
+	CameraSpeed *= 2.0f;
+	GetCharacterMovement()->MaxWalkSpeed = CameraSpeed;
+	//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, FString::Printf(TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed));
+
 }
 
 void AFloatingCharacterController::HasteReleased()
 {
-	CameraSpeed /= 1.5f;
+	CameraSpeed /= 2.0f;
+	GetCharacterMovement()->MaxWalkSpeed = CameraSpeed;
+	//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, FString::Printf(TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed));
+
 }
 
