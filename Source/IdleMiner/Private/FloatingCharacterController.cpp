@@ -72,17 +72,22 @@ void AFloatingCharacterController::MoveEast(float Amount)
 }
 
 void AFloatingCharacterController::ZoomIn(float Amount)
-{
-	SetActorLocation(FMath::Clamp(GetActorLocation().operator+(FVector(0,0, Amount*50).Z), MaxCameraDistance, MinCameraDistance), false);
+{	
+	if (Amount == 0) return;
+
+	CameraDistance = FMath::Clamp(GetActorLocation().operator+(FVector(0, 0, Amount * 50)).Z, MaxCameraDistance, MinCameraDistance);
 	
-	//FMath::Clamp(GetActorLocation().Z, MaxCameraDistance, MinCameraDistance);
-	FMath::Clamp(SetActorLocation(GetActorLocation().operator+(FVector(0, 0, Amount * 50)), false), MaxCameraDistance, MinCameraDistance);
-	
+	SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, CameraDistance), false);
 	
 
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, FString::Printf(TEXT("%f"), GetActorLocation().Z));
 
-	//FMath::Clamp(MyFloat, 0.0f, 100.0f)
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString::Printf(TEXT("%f"), CameraSpeed));
+
+	CameraSpeed = CameraDistance;
+	GetCharacterMovement()->MaxWalkSpeed = CameraSpeed;
+
+
 }
 
 
