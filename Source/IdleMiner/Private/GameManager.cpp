@@ -2,6 +2,7 @@
 
 
 #include "GameManager.h"
+#include "Kismet/GameplayStatics.h"
 #include "Building_PlayerController.h"
 
 AGameManager* AGameManager::Instance = nullptr;
@@ -12,13 +13,6 @@ AGameManager::AGameManager() :
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	ResourceCounts.Empty();
-	ResourceCounts.Add(EResource::R_Coin, 0);
-	ResourceCounts.Add(EResource::R_Copper, 0);
-	ResourceCounts.Add(EResource::R_Iron, 0);
-	ResourceCounts.Add(EResource::R_Gold, 0);
-
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
@@ -58,13 +52,57 @@ void AGameManager::BeginPlay()
 
 	GatherResources();
 
-	ResourceCounts[EResource::R_Copper] = 10;
+	FindEnvironmentalBuildings();
 }
 
 // Called every frame
 void AGameManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AGameManager::OnConstruction(const FTransform& Transform)
+{
+	if (button_FindEnvironmentalBuildings)
+	{
+		button_FindEnvironmentalBuildings = false;
+
+		FindEnvironmentalBuildings();
+	}
+}
+
+void AGameManager::FindEnvironmentalBuildings()
+{
+	TSubclassOf<ABuildingBase> ClassToFind = ABuildingBase::StaticClass();
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ClassToFind, FoundActors);
+
+	EnvironmentBuildings = TMap<FSGridPosition, FSPlacedBuilding>();
+
+	for (AActor* actor : FoundActors)
+	{
+		FVector TargetLocation = actor->GetActorLocation();
+		TargetLocation.Z = GetActorLocation().Z;
+
+		FVector SnappedLocation = TargetLocation;
+		SnappedLocation.X = FMath::GridSnap(SnappedLocation.X, GridSize);
+		SnappedLocation.Y = FMath::GridSnap(SnappedLocation.Y, GridSize);
+
+		FSGridPosition gridPos = FSGridPosition::
+			GetPositionInGrid(GetActorLocation(), SnappedLocation, GridSize);
+
+		if (EnvironmentBuildings.Contains(gridPos))
+		{
+			actor->Destroy();
+			continue;
+		}
+
+		ABuildingBase* building = (ABuildingBase*)actor;
+
+		building->SetActorLocation(SnappedLocation);
+		EnvironmentBuildings.Add(gridPos, FSPlacedBuilding(building, gridPos));
+	}
 }
 
 void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPressed)
@@ -86,13 +124,25 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 		FSGridPosition gridPos = FSGridPosition::GetPositionInGrid(GetActorLocation(), SnappedLocation, GridSize);
 
 		bool canPlace = true;
-		for (FSPlacedBuilding building : PlacedBuildings)
+		bool replace = false;
+		TSubclassOf<ABuildingBase> OccupyingBuildingClass = nullptr;
+
+		if (PlacedBuildings.Contains(gridPos))
 		{
-			if (FSGridPosition::Compare(building.Position, gridPos))
-			{
-				canPlace = false;
-				break;
-			}
+			canPlace = false;
+		}
+		else if (EnvironmentBuildings.Contains(gridPos))
+		{
+			OccupyingBuildingClass = EnvironmentBuildings[gridPos].Building->GetClass();
+		}
+
+		if (CurrentBuilding.GetDefaultObject()->BuildingToPlaceOver != OccupyingBuildingClass)
+		{
+			canPlace = false;
+		}
+		else if (OccupyingBuildingClass != nullptr)
+		{
+			replace = true;
 		}
 
 		if (canPlace)//check build cost if still can place
@@ -107,7 +157,7 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 			}
 		}
 
-		//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, FString::Printf(TEXT("%ix%i %s"), gridPos.XPos, gridPos.YPos, canPlace ? TEXT("NOT Occupied") : TEXT("IS Occupied")));
+		//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, FString::Printf(TEXT(""), );
 
 		if (canPlace)
 		{
@@ -121,7 +171,13 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 			FRotator SpawnRotation = FRotator(0, 0, 0);
 
 			ABuildingBase* SpawnedRef = GetWorld()->SpawnActor<ABuildingBase>(CurrentBuilding, SpawnLocation, SpawnRotation, SpawnInfo);
-			PlacedBuildings.Add(FSPlacedBuilding(SpawnedRef, gridPos));
+
+			if (replace)
+			{
+				EnvironmentBuildings[gridPos].Building->SetActorHidden(true);
+			}
+
+			PlacedBuildings.Add(gridPos, FSPlacedBuilding(SpawnedRef, gridPos));
 		}
 	}
 
@@ -135,9 +191,11 @@ void AGameManager::GatherResources()
 	/*int CoinGain = PlacedBuildings.Num();
 	Count_Coin += CoinGain;*/
 
-	for (FSPlacedBuilding placedB : PlacedBuildings)
+	TArray<FSPlacedBuilding> buildings;
+	PlacedBuildings.GenerateValueArray(buildings);
+
+	for (FSPlacedBuilding placedB : buildings)
 	{
-		FString debugMessage = TEXT("");
 		ABuildingBase* building = placedB.Building;
 
 		bool doesHaveAllResources = true;
@@ -164,6 +222,7 @@ void AGameManager::GatherResources()
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, .8f, FColor::White, TEXT("Gathering resources..."));
+
 	GWorld->GetTimerManager().SetTimer(GatherHandle, this, &AGameManager::GatherResources, ResourceGatherSpeed, false);
 }
 

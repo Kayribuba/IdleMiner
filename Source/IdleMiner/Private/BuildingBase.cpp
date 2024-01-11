@@ -22,6 +22,13 @@ ABuildingBase::ABuildingBase()
 	Mesh->SetupAttachment(RootComponent);
 }
 
+void ABuildingBase::SetActorHidden(bool setTo)
+{
+	SetActorHiddenInGame(setTo);
+	SetActorEnableCollision(!setTo);
+	SetActorTickEnabled(!setTo);
+}
+
 // Called when the game starts or when spawned
 void ABuildingBase::BeginPlay()
 {

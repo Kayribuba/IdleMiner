@@ -41,7 +41,7 @@ class ABuildingBase : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
+public:
 	// Sets default values for this actor's properties
 	ABuildingBase();
 
@@ -55,10 +55,15 @@ public:
 	TArray<FSBuildingProcess> NeedsPerClock;
 
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<ABuildingBase> BuildingToPlaceOver;
+
+	UPROPERTY(EditAnywhere)
 	UBoxComponent* Box;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* Mesh;
+
+	void SetActorHidden(bool setTo);
 
 protected:
 	// Called when the game starts or when spawned
@@ -67,5 +72,4 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 };
