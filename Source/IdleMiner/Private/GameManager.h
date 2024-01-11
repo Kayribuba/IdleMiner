@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BuildingBase.h"
-//#include "GameSlot.h"
 #include "GameManager.generated.h"
 
 
@@ -28,7 +27,6 @@ struct FSGridPosition
 		return FVector(XPos, YPos, 0);
 	}
 
-
 	static FSGridPosition GetPositionInGrid(FVector origin, FVector location, float GridSize)
 	{
 		FVector targetVector = location - origin;
@@ -41,7 +39,19 @@ struct FSGridPosition
 	{
 		return first.XPos == second.XPos && first.YPos == second.YPos;
 	}
+
+	bool operator==(const FSGridPosition& Other) const
+	{
+		return XPos == Other.XPos && YPos == Other.YPos;
+	}
+
 };
+
+FORCEINLINE uint32 GetTypeHash(const FSGridPosition& MidiTime)
+{
+	uint32 Hash = FCrc::MemCrc32(&MidiTime, sizeof(FSGridPosition));
+	return Hash;
+}
 
 USTRUCT(Blueprintable)
 struct FSPlacedBuilding
@@ -61,7 +71,18 @@ struct FSPlacedBuilding
 
 	UPROPERTY(EditAnywhere)
 	FSGridPosition Position;
+
+	bool operator==(const FSPlacedBuilding& Other) const
+	{
+		return Building == Other.Building && Position == Other.Position;
+	}
 };
+
+FORCEINLINE uint32 GetTypeHash(const FSPlacedBuilding& MidiTime)
+{
+	uint32 Hash = FCrc::MemCrc32(&MidiTime, sizeof(FSPlacedBuilding));
+	return Hash;
+}
 
 UCLASS()
 class AGameManager : public AActor
@@ -84,6 +105,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+	UPROPERTY(EditAnywhere)
+	bool button_FindEnvironmentalBuildings;
+
 	UPROPERTY(EditAnywhere)
 	float GridSize;
 
@@ -94,7 +120,10 @@ public:
 	TSubclassOf<ABuildingBase> CurrentBuilding;
 
 	UPROPERTY(VisibleAnywhere)
-	TArray<FSPlacedBuilding> PlacedBuildings;
+	TMap<FSGridPosition, FSPlacedBuilding> PlacedBuildings;
+
+	UPROPERTY(VisibleAnywhere)
+	TMap<FSGridPosition, FSPlacedBuilding> EnvironmentBuildings;
 
 	UStaticMeshComponent* BuildingPreviewMesh;
 
@@ -113,6 +142,8 @@ public:
 	bool DoesHaveResources(FSBuildingProcess process);
 
 	void AddResources(FSBuildingProcess process);
+
+	void FindEnvironmentalBuildings();
 
 	bool TryRemoveResources(FSBuildingProcess process);
 
