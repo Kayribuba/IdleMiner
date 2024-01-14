@@ -80,9 +80,9 @@ void AFloatingCharacterController::ZoomIn(float Amount)
 	SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, CameraDistance), false);
 	
 
-	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, FString::Printf(TEXT("%f"), GetActorLocation().Z));
+	//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, FString::Printf(TEXT("%f"), GetActorLocation().Z));
 
-	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString::Printf(TEXT("%f"), CameraSpeed));
+	//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, FString::Printf(TEXT("%f"), CameraSpeed));
 
 	CameraSpeed = CameraDistance;
 	GetCharacterMovement()->MaxWalkSpeed = CameraSpeed;
