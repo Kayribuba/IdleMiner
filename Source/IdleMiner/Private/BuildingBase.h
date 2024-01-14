@@ -46,6 +46,9 @@ public:
 	ABuildingBase();
 
 	UPROPERTY(EditAnywhere)
+	bool DisableOnReplaced;
+
+	UPROPERTY(EditAnywhere)
 	TArray<FSBuildingProcess> BuildCosts;
 
 	UPROPERTY(EditAnywhere)

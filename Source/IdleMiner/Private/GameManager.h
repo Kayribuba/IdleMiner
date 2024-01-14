@@ -98,10 +98,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-
-	UPROPERTY(EditAnywhere)
-	TMap<TEnumAsByte<EResource>, int> ResourceCounts;
-
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -109,6 +105,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool button_FindEnvironmentalBuildings;
+
+	UPROPERTY(EditAnywhere)
+	TMap<TEnumAsByte<EResource>, int> ResourceCounts;
 
 	UPROPERTY(EditAnywhere)
 	float GridSize;

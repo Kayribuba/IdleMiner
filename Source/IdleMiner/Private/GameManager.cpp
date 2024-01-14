@@ -174,7 +174,7 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 
 			if (replace)
 			{
-				EnvironmentBuildings[gridPos].Building->SetActorHidden(true);
+				EnvironmentBuildings[gridPos].Building->SetActorHidden(EnvironmentBuildings[gridPos].Building->DisableOnReplaced);
 			}
 
 			PlacedBuildings.Add(gridPos, FSPlacedBuilding(SpawnedRef, gridPos));
