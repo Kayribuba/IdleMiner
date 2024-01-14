@@ -14,7 +14,10 @@ enum EResource
 	R_Coin,
 	R_Copper,
 	R_Iron,
-	R_Gold
+	R_Gold,
+	R_WireCopper,
+	R_Pan_Iron,
+	R_NecklaceGold
 };
 
 USTRUCT(BlueprintType)
