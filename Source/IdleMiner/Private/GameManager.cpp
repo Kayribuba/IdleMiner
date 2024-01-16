@@ -37,9 +37,35 @@ void AGameManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (UsableBuildings.Num() > 0)
+	DrillIndex = 0;
+	FactoryIndex = 0;
+	StoreIndex = 0;
+
+	if (Drills.Num() > 0)
 	{
-		CurrentBuilding = UsableBuildings[0];
+		CurrentBuilding = Drills[0];
+
+		UStaticMesh* tempMesh = CurrentBuilding.GetDefaultObject()->Mesh->GetStaticMesh();
+
+		BuildingPreviewMesh->SetStaticMesh(tempMesh);
+		BuildingPreviewMesh->SetMaterial(0, GhostMaterial);
+
+		GridIndicatorMesh->SetMaterial(0, GhostMaterial);
+	}
+	else if (Factories.Num() > 0)
+	{
+		CurrentBuilding = Factories[0];
+
+		UStaticMesh* tempMesh = CurrentBuilding.GetDefaultObject()->Mesh->GetStaticMesh();
+
+		BuildingPreviewMesh->SetStaticMesh(tempMesh);
+		BuildingPreviewMesh->SetMaterial(0, GhostMaterial);
+
+		GridIndicatorMesh->SetMaterial(0, GhostMaterial);
+	}
+	else if (Stores.Num() > 0)
+	{
+		CurrentBuilding = Stores[0];
 
 		UStaticMesh* tempMesh = CurrentBuilding.GetDefaultObject()->Mesh->GetStaticMesh();
 
@@ -249,4 +275,28 @@ void AGameManager::AddResources(FSBuildingProcess process)
 	{
 		ResourceCounts[process.Type] += process.Count;
 	}
+}
+
+void AGameManager::ChangeSelectedBuilding(EBuilding building)
+{
+	if (building == R_DrillBasic || building == R_DrillAdvanced || building == R_DrillExceptional)
+	{
+		if (Drills.Num() <= 0) return;
+		DrillIndex = (DrillIndex + 1) % Drills.Num();
+		CurrentBuilding = Drills[DrillIndex];
+	}
+	else if (building == R_FactoryCopperWire || building == R_FactoryIronPan || building == R_FactoryGoldNecklace)
+	{
+		if (Factories.Num() <= 0) return;
+		FactoryIndex = (FactoryIndex + 1) % Factories.Num();
+		CurrentBuilding = Factories[FactoryIndex];
+	}
+	else if(building == R_StoreHardware || building == R_StoreUtensil || building == R_StoreJewelery)
+	{
+		if (Stores.Num() <= 0) return;
+		StoreIndex = (StoreIndex + 1) % Stores.Num();
+		CurrentBuilding = Stores[StoreIndex];
+	}
+
+	RefreshUI(CurrentBuilding.GetDefaultObject()->Type);
 }

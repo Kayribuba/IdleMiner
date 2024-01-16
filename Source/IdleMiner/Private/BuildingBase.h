@@ -20,6 +20,22 @@ enum EResource
 	R_NecklaceGold
 };
 
+UENUM(Blueprintable)
+enum EBuilding
+{
+	R_Unknown,
+	R_DrillBasic,
+	R_DrillAdvanced,
+	R_DrillExceptional,
+	R_FactoryCopperWire,
+	R_FactoryIronPan,
+	R_FactoryGoldNecklace,
+	R_StoreHardware,
+	R_StoreUtensil,
+	R_StoreJewelery,
+	R_Unassigned
+};
+
 USTRUCT(BlueprintType)
 struct FSBuildingProcess
 {
@@ -50,6 +66,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool DisableOnReplaced;
+
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EBuilding> Type;
 
 	UPROPERTY(EditAnywhere)
 	TArray<FSBuildingProcess> BuildCosts;
