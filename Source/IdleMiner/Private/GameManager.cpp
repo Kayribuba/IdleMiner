@@ -48,7 +48,10 @@ void AGameManager::BeginPlay()
 		UStaticMesh* tempMesh = CurrentBuilding.GetDefaultObject()->Mesh->GetStaticMesh();
 
 		BuildingPreviewMesh->SetStaticMesh(tempMesh);
-		BuildingPreviewMesh->SetMaterial(0, GhostMaterial);
+		for (int i = 0; i < BuildingPreviewMesh->GetNumMaterials(); i++)
+		{
+			BuildingPreviewMesh->SetMaterial(i, GhostMaterial);
+		}
 
 		GridIndicatorMesh->SetMaterial(0, GhostMaterial);
 	}
@@ -131,6 +134,15 @@ void AGameManager::FindEnvironmentalBuildings()
 	}
 }
 
+void AGameManager::RefreshResourceCountsHelper()
+{
+	TArray<TEnumAsByte<EResource>> types;
+	TArray<int> counts;
+	ResourceCounts.GenerateKeyArray(types);
+	ResourceCounts.GenerateValueArray(counts);
+	RefreshResourceCounts(types, counts);
+}
+
 void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPressed)
 {
 	FVector TargetLocation = FVector(Location.X, Location.Y, GetActorLocation().Z);
@@ -204,6 +216,8 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 			}
 
 			PlacedBuildings.Add(gridPos, FSPlacedBuilding(SpawnedRef, gridPos));
+
+			RefreshResourceCountsHelper();
 		}
 	}
 
@@ -246,6 +260,8 @@ void AGameManager::GatherResources()
 			AddResources(process);
 		}
 	}
+
+	RefreshResourceCountsHelper();
 
 	GEngine->AddOnScreenDebugMessage(-1, .8f, FColor::White, TEXT("Gathering resources..."));
 
@@ -299,4 +315,12 @@ void AGameManager::ChangeSelectedBuilding(EBuilding building)
 	}
 
 	RefreshUI(CurrentBuilding.GetDefaultObject()->Type);
+
+	UStaticMesh* tempMesh = CurrentBuilding.GetDefaultObject()->Mesh->GetStaticMesh();
+
+	BuildingPreviewMesh->SetStaticMesh(tempMesh);
+	for (int i = 0; i < BuildingPreviewMesh->GetNumMaterials(); i++)
+	{
+		BuildingPreviewMesh->SetMaterial(i, GhostMaterial);
+	}
 }
