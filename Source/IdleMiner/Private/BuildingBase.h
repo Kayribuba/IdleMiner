@@ -68,6 +68,9 @@ public:
 	bool DisableOnReplaced;
 
 	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EBuilding> Type;
+
+	UPROPERTY(EditAnywhere)
 	TArray<FSBuildingProcess> BuildCosts;
 
 	UPROPERTY(EditAnywhere)

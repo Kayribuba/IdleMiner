@@ -55,4 +55,8 @@ private:
 
 	void HastePressed();
 	void HasteReleased();
+
+	void SelectDrill();
+	void SelectFactory();
+	void SelectStore();
 };
