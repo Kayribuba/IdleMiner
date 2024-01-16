@@ -48,7 +48,10 @@ void AGameManager::BeginPlay()
 		UStaticMesh* tempMesh = CurrentBuilding.GetDefaultObject()->Mesh->GetStaticMesh();
 
 		BuildingPreviewMesh->SetStaticMesh(tempMesh);
-		BuildingPreviewMesh->SetMaterial(0, GhostMaterial);
+		for (int i = 0; i < BuildingPreviewMesh->GetNumMaterials(); i++)
+		{
+			BuildingPreviewMesh->SetMaterial(i, GhostMaterial);
+		}
 
 		GridIndicatorMesh->SetMaterial(0, GhostMaterial);
 	}
@@ -131,6 +134,15 @@ void AGameManager::FindEnvironmentalBuildings()
 	}
 }
 
+void AGameManager::RefreshResourceCountsHelper()
+{
+	TArray<TEnumAsByte<EResource>> types;
+	TArray<int> counts;
+	ResourceCounts.GenerateKeyArray(types);
+	ResourceCounts.GenerateValueArray(counts);
+	RefreshResourceCounts(types, counts);
+}
+
 void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPressed)
 {
 	FVector TargetLocation = FVector(Location.X, Location.Y, GetActorLocation().Z);
@@ -204,6 +216,8 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 			}
 
 			PlacedBuildings.Add(gridPos, FSPlacedBuilding(SpawnedRef, gridPos));
+
+			RefreshResourceCountsHelper();
 		}
 	}
 
@@ -247,6 +261,8 @@ void AGameManager::GatherResources()
 		}
 	}
 
+	RefreshResourceCountsHelper();
+
 	GEngine->AddOnScreenDebugMessage(-1, .8f, FColor::White, TEXT("Gathering resources..."));
 
 	GWorld->GetTimerManager().SetTimer(GatherHandle, this, &AGameManager::GatherResources, ResourceGatherSpeed, false);
@@ -279,19 +295,19 @@ void AGameManager::AddResources(FSBuildingProcess process)
 
 void AGameManager::ChangeSelectedBuilding(EBuilding building)
 {
-	if (building == R_DrillBasic || building == R_DrillAdvanced || building == R_DrillExceptional)
+	if (building == B_DrillBasic || building == B_DrillAdvanced || building == B_DrillExceptional)
 	{
 		if (Drills.Num() <= 0) return;
 		DrillIndex = (DrillIndex + 1) % Drills.Num();
 		CurrentBuilding = Drills[DrillIndex];
 	}
-	else if (building == R_FactoryCopperWire || building == R_FactoryIronPan || building == R_FactoryGoldNecklace)
+	else if (building == B_FactoryCopperWire || building == B_FactoryIronPan || building == B_FactoryGoldNecklace)
 	{
 		if (Factories.Num() <= 0) return;
 		FactoryIndex = (FactoryIndex + 1) % Factories.Num();
 		CurrentBuilding = Factories[FactoryIndex];
 	}
-	else if(building == R_StoreHardware || building == R_StoreUtensil || building == R_StoreJewelery)
+	else if(building == B_StoreHardware || building == B_StoreUtensil || building == B_StoreJewelery)
 	{
 		if (Stores.Num() <= 0) return;
 		StoreIndex = (StoreIndex + 1) % Stores.Num();
@@ -299,4 +315,12 @@ void AGameManager::ChangeSelectedBuilding(EBuilding building)
 	}
 
 	RefreshUI(CurrentBuilding.GetDefaultObject()->Type);
+
+	UStaticMesh* tempMesh = CurrentBuilding.GetDefaultObject()->Mesh->GetStaticMesh();
+
+	BuildingPreviewMesh->SetStaticMesh(tempMesh);
+	for (int i = 0; i < BuildingPreviewMesh->GetNumMaterials(); i++)
+	{
+		BuildingPreviewMesh->SetMaterial(i, GhostMaterial);
+	}
 }

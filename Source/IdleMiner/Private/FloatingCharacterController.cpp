@@ -114,16 +114,16 @@ void AFloatingCharacterController::HasteReleased()
 
 void AFloatingCharacterController::SelectDrill()
 {
-	AGameManager::Instance->ChangeSelectedBuilding(EBuilding::R_DrillBasic);
+	AGameManager::Instance->ChangeSelectedBuilding(EBuilding::B_DrillBasic);
 }
 
 void AFloatingCharacterController::SelectFactory()
 {
-	AGameManager::Instance->ChangeSelectedBuilding(EBuilding::R_FactoryCopperWire);
+	AGameManager::Instance->ChangeSelectedBuilding(EBuilding::B_FactoryCopperWire);
 }
 
 void AFloatingCharacterController::SelectStore()
 {
-	AGameManager::Instance->ChangeSelectedBuilding(EBuilding::R_StoreHardware);
+	AGameManager::Instance->ChangeSelectedBuilding(EBuilding::B_StoreHardware);
 }
 

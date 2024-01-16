@@ -150,6 +150,11 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void RefreshUI(EBuilding building);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void RefreshResourceCounts(const TArray<TEnumAsByte<EResource>>& types, const TArray<int>& values);
+
+	void RefreshResourceCountsHelper();
+
 	void SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPressed);
 
 	void GatherResources();
