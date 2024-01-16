@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "GameManager.h"
 #include "FloatingCharacterController.h"
 
 // Sets default values
@@ -59,6 +60,10 @@ void AFloatingCharacterController::SetupPlayerInputComponent(UInputComponent* Pl
 
 	PlayerInputComponent->BindAction("Haste", IE_Pressed, this, &AFloatingCharacterController::HastePressed);
 	PlayerInputComponent->BindAction("Haste", IE_Released, this, &AFloatingCharacterController::HasteReleased);
+
+	PlayerInputComponent->BindAction("DrillSelect", IE_Pressed, this, &AFloatingCharacterController::SelectDrill);
+	PlayerInputComponent->BindAction("FactorySelect", IE_Pressed, this, &AFloatingCharacterController::SelectFactory);
+	PlayerInputComponent->BindAction("StoreSelect", IE_Pressed, this, &AFloatingCharacterController::SelectStore);
 }
 
 void AFloatingCharacterController::MoveNorth(float Amount)
@@ -105,5 +110,20 @@ void AFloatingCharacterController::HasteReleased()
 	GetCharacterMovement()->MaxWalkSpeed = CameraSpeed;
 	//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, FString::Printf(TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed));
 
+}
+
+void AFloatingCharacterController::SelectDrill()
+{
+	AGameManager::Instance->ChangeSelectedBuilding(EBuilding::R_DrillBasic);
+}
+
+void AFloatingCharacterController::SelectFactory()
+{
+	AGameManager::Instance->ChangeSelectedBuilding(EBuilding::R_FactoryCopperWire);
+}
+
+void AFloatingCharacterController::SelectStore()
+{
+	AGameManager::Instance->ChangeSelectedBuilding(EBuilding::R_StoreHardware);
 }
 

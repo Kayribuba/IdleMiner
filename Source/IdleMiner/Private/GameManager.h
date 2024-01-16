@@ -114,7 +114,19 @@ public:
 	float GridSize;
 
 	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<ABuildingBase>> UsableBuildings;
+	TArray<TSubclassOf<ABuildingBase>> Drills;
+
+	int DrillIndex;
+
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<ABuildingBase>> Factories;
+
+	int FactoryIndex;
+
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<ABuildingBase>> Stores;
+
+	int StoreIndex;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABuildingBase> CurrentBuilding;
@@ -135,6 +147,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	float ResourceGatherSpeed;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void RefreshUI(EBuilding building);
+
 	void SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPressed);
 
 	void GatherResources();
@@ -142,6 +157,8 @@ public:
 	bool DoesHaveResources(FSBuildingProcess process);
 
 	void AddResources(FSBuildingProcess process);
+
+	void ChangeSelectedBuilding(EBuilding building);
 
 	void FindEnvironmentalBuildings();
 
