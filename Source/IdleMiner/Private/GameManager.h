@@ -150,7 +150,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	float ResourceGatherSpeed;
 
-	ABuildingBase* SelectedBuilding;
+	FSPlacedBuilding SelectedBuilding;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void RefreshSelectionMenu(int UpgradeCost);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void RefreshUI(int buildingAsInt);
@@ -177,6 +180,10 @@ public:
 	void DeleteSelectedBuilding();
 
 	void UpgradeSelectedBuilding();
+
+	void SelectBuilding(FSPlacedBuilding building);
+
+	void DeselectBuilding();
 
 	static AGameManager* Instance;
 

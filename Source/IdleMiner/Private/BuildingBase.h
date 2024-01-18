@@ -73,6 +73,9 @@ public:
 	TArray<FSBuildingProcess> BuildCosts;
 
 	UPROPERTY(EditAnywhere)
+	FSBuildingProcess UpgradeCost;
+
+	UPROPERTY(EditAnywhere)
 	TArray<FSBuildingProcess> GainsPerClock;
 
 	UPROPERTY(EditAnywhere)

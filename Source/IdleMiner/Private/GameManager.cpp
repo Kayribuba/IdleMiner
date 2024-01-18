@@ -79,7 +79,7 @@ void AGameManager::BeginPlay()
 
 	FindEnvironmentalBuildings();
 
-	RefreshUI(CurrentBuilding.GetDefaultObject()->Type);
+	RefreshUI((int)CurrentBuilding.GetDefaultObject()->Type.GetIntValue());
 }
 
 // Called every frame
@@ -157,7 +157,7 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 
 	if (IsPressed && WasM0Pressed == false)
 	{
-		//deselect building
+		DeselectBuilding();
 
 		FSGridPosition gridPos = FSGridPosition::GetPositionInGrid(GetActorLocation(), SnappedLocation, GridSize);
 
@@ -221,7 +221,7 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 		}
 		else if (PlacedBuildings.Contains(gridPos))
 		{
-			//select here
+			SelectBuilding(PlacedBuildings[gridPos]);
 		}
 	}
 
@@ -291,16 +291,39 @@ bool AGameManager::TryRemoveResources(FSBuildingProcess process)
 
 void AGameManager::DeleteSelectedBuilding()
 {
-	if (SelectedBuilding == nullptr) return;
+	if (SelectedBuilding.Building == nullptr) return;
 
+	if (PlacedBuildings.Contains(SelectedBuilding.Position) == false) return;
 
+	PlacedBuildings.Remove(SelectedBuilding.Position);
+	PlacedBuildings[SelectedBuilding.Position].Building->Destroy();
+
+	RefreshSelectionMenu(-1);
 }
 
 void AGameManager::UpgradeSelectedBuilding()
 {
-	if (SelectedBuilding == nullptr) return;
+	if (SelectedBuilding.Building == nullptr) return;
 
-	SelectedBuilding->Upgrade();
+	if (DoesHaveResources(SelectedBuilding.Building->UpgradeCost) == false) return;
+
+	TryRemoveResources(SelectedBuilding.Building->UpgradeCost);
+
+	SelectedBuilding.Building->Upgrade();
+
+	RefreshSelectionMenu(SelectedBuilding.Building->UpgradeCost.Count);
+}
+
+void AGameManager::SelectBuilding(FSPlacedBuilding building)
+{
+	SelectedBuilding = building;
+	RefreshSelectionMenu(SelectedBuilding.Building->UpgradeCost.Count);
+}
+
+void AGameManager::DeselectBuilding()
+{
+	SelectedBuilding = FSPlacedBuilding(nullptr, 0, 0);
+	RefreshSelectionMenu(-1);
 }
 
 void AGameManager::AddResources(FSBuildingProcess process)
