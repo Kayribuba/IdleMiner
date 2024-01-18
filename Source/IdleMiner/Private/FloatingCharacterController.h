@@ -59,4 +59,7 @@ private:
 	void SelectDrill();
 	void SelectFactory();
 	void SelectStore();
+
+	void DeleteBuilding();
+	void UpgradeBuilding();
 };

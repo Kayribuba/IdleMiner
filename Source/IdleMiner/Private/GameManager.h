@@ -145,10 +145,15 @@ public:
 	UMaterialInterface* GhostMaterial;
 
 	UPROPERTY(EditAnywhere)
+	UMaterialInterface* GhostTileMaterial;
+
+	UPROPERTY(EditAnywhere)
 	float ResourceGatherSpeed;
 
+	ABuildingBase* SelectedBuilding;
+
 	UFUNCTION(BlueprintImplementableEvent)
-	void RefreshUI(EBuilding building);
+	void RefreshUI(int buildingAsInt);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void RefreshResourceCounts(const TArray<TEnumAsByte<EResource>>& types, const TArray<int>& values);
@@ -168,6 +173,10 @@ public:
 	void FindEnvironmentalBuildings();
 
 	bool TryRemoveResources(FSBuildingProcess process);
+
+	void DeleteSelectedBuilding();
+
+	void UpgradeSelectedBuilding();
 
 	static AGameManager* Instance;
 

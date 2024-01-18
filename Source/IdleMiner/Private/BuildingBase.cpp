@@ -29,6 +29,18 @@ void ABuildingBase::SetActorHidden(bool setTo)
 	SetActorTickEnabled(!setTo);
 }
 
+void ABuildingBase::Upgrade()
+{
+	if (IsUpgraded) return;
+
+	for (FSBuildingProcess process : UpgradeAddings)
+	{
+		GainsPerClock.Add(process);
+	}
+
+	IsUpgraded = true;
+}
+
 // Called when the game starts or when spawned
 void ABuildingBase::BeginPlay()
 {

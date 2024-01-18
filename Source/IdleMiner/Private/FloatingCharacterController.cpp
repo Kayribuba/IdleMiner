@@ -64,6 +64,9 @@ void AFloatingCharacterController::SetupPlayerInputComponent(UInputComponent* Pl
 	PlayerInputComponent->BindAction("DrillSelect", IE_Pressed, this, &AFloatingCharacterController::SelectDrill);
 	PlayerInputComponent->BindAction("FactorySelect", IE_Pressed, this, &AFloatingCharacterController::SelectFactory);
 	PlayerInputComponent->BindAction("StoreSelect", IE_Pressed, this, &AFloatingCharacterController::SelectStore);
+
+	PlayerInputComponent->BindAction("DeleteBuilding", IE_Pressed, this, &AFloatingCharacterController::DeleteBuilding);
+	PlayerInputComponent->BindAction("UpgradeBuilding", IE_Pressed, this, &AFloatingCharacterController::UpgradeBuilding);
 }
 
 void AFloatingCharacterController::MoveNorth(float Amount)
@@ -91,10 +94,7 @@ void AFloatingCharacterController::ZoomIn(float Amount)
 
 	CameraSpeed = CameraDistance;
 	GetCharacterMovement()->MaxWalkSpeed = CameraSpeed;
-
-
 }
-
 
 void AFloatingCharacterController::HastePressed()
 {
@@ -125,5 +125,15 @@ void AFloatingCharacterController::SelectFactory()
 void AFloatingCharacterController::SelectStore()
 {
 	AGameManager::Instance->ChangeSelectedBuilding(EBuilding::B_StoreHardware);
+}
+
+void AFloatingCharacterController::DeleteBuilding()
+{
+	AGameManager::Instance->DeleteSelectedBuilding();
+}
+
+void AFloatingCharacterController::UpgradeBuilding()
+{
+	AGameManager::Instance->UpgradeSelectedBuilding();
 }
 

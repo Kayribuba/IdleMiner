@@ -76,6 +76,9 @@ public:
 	TArray<FSBuildingProcess> GainsPerClock;
 
 	UPROPERTY(EditAnywhere)
+	TArray<FSBuildingProcess> UpgradeAddings;
+
+	UPROPERTY(EditAnywhere)
 	TArray<FSBuildingProcess> NeedsPerClock;
 
 	UPROPERTY(EditAnywhere)
@@ -88,6 +91,10 @@ public:
 	UStaticMeshComponent* Mesh;
 
 	void SetActorHidden(bool setTo);
+
+	void Upgrade();
+
+	bool IsUpgraded;
 
 protected:
 	// Called when the game starts or when spawned

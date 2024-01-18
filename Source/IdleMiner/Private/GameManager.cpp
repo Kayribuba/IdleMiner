@@ -52,8 +52,6 @@ void AGameManager::BeginPlay()
 		{
 			BuildingPreviewMesh->SetMaterial(i, GhostMaterial);
 		}
-
-		GridIndicatorMesh->SetMaterial(0, GhostMaterial);
 	}
 	else if (Factories.Num() > 0)
 	{
@@ -63,8 +61,6 @@ void AGameManager::BeginPlay()
 
 		BuildingPreviewMesh->SetStaticMesh(tempMesh);
 		BuildingPreviewMesh->SetMaterial(0, GhostMaterial);
-
-		GridIndicatorMesh->SetMaterial(0, GhostMaterial);
 	}
 	else if (Stores.Num() > 0)
 	{
@@ -74,14 +70,16 @@ void AGameManager::BeginPlay()
 
 		BuildingPreviewMesh->SetStaticMesh(tempMesh);
 		BuildingPreviewMesh->SetMaterial(0, GhostMaterial);
-
-		GridIndicatorMesh->SetMaterial(0, GhostMaterial);
 	}
 	else CurrentBuilding = nullptr;
+
+	GridIndicatorMesh->SetMaterial(0, GhostTileMaterial);
 
 	GatherResources();
 
 	FindEnvironmentalBuildings();
+
+	RefreshUI(CurrentBuilding.GetDefaultObject()->Type);
 }
 
 // Called every frame
@@ -153,12 +151,14 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 
 	if (CurrentBuilding != nullptr)
 	{
-		BuildingPreviewMesh->SetWorldLocation(TargetLocation);
+		BuildingPreviewMesh->SetWorldLocation(SnappedLocation);
 	}
 	GridIndicatorMesh->SetWorldLocation(SnappedLocation);
 
 	if (IsPressed && WasM0Pressed == false)
 	{
+		//deselect building
+
 		FSGridPosition gridPos = FSGridPosition::GetPositionInGrid(GetActorLocation(), SnappedLocation, GridSize);
 
 		bool canPlace = true;
@@ -218,6 +218,10 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 			PlacedBuildings.Add(gridPos, FSPlacedBuilding(SpawnedRef, gridPos));
 
 			RefreshResourceCountsHelper();
+		}
+		else if (PlacedBuildings.Contains(gridPos))
+		{
+			//select here
 		}
 	}
 
@@ -285,6 +289,20 @@ bool AGameManager::TryRemoveResources(FSBuildingProcess process)
 	return true;
 }
 
+void AGameManager::DeleteSelectedBuilding()
+{
+	if (SelectedBuilding == nullptr) return;
+
+
+}
+
+void AGameManager::UpgradeSelectedBuilding()
+{
+	if (SelectedBuilding == nullptr) return;
+
+	SelectedBuilding->Upgrade();
+}
+
 void AGameManager::AddResources(FSBuildingProcess process)
 {
 	if (ResourceCounts.Contains(process.Type))
@@ -314,7 +332,7 @@ void AGameManager::ChangeSelectedBuilding(EBuilding building)
 		CurrentBuilding = Stores[StoreIndex];
 	}
 
-	RefreshUI(CurrentBuilding.GetDefaultObject()->Type);
+	RefreshUI((int)CurrentBuilding.GetDefaultObject()->Type.GetIntValue());
 
 	UStaticMesh* tempMesh = CurrentBuilding.GetDefaultObject()->Mesh->GetStaticMesh();
 
