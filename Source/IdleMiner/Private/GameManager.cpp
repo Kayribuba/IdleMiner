@@ -222,6 +222,9 @@ void AGameManager::SendMouseTrace(AActor* HitActor, FVector& Location, bool IsPr
 		else if (PlacedBuildings.Contains(gridPos))
 		{
 			SelectBuilding(PlacedBuildings[gridPos]);
+
+			FString debug = PlacedBuildings[gridPos].Building->IsUpgraded ? TEXT("true") : TEXT("false");
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::White, debug);
 		}
 	}
 
@@ -296,34 +299,34 @@ void AGameManager::DeleteSelectedBuilding()
 	if (PlacedBuildings.Contains(SelectedBuilding.Position) == false) return;
 
 	PlacedBuildings.Remove(SelectedBuilding.Position);
-	PlacedBuildings[SelectedBuilding.Position].Building->Destroy();
+	SelectedBuilding.Building->Destroy();
 
-	RefreshSelectionMenu(-1);
+	DeselectBuilding();
 }
 
 void AGameManager::UpgradeSelectedBuilding()
 {
 	if (SelectedBuilding.Building == nullptr) return;
-
+	if (SelectedBuilding.Building->IsUpgraded == true) return;
 	if (DoesHaveResources(SelectedBuilding.Building->UpgradeCost) == false) return;
 
 	TryRemoveResources(SelectedBuilding.Building->UpgradeCost);
 
 	SelectedBuilding.Building->Upgrade();
 
-	RefreshSelectionMenu(SelectedBuilding.Building->UpgradeCost.Count);
+	DeselectBuilding();
 }
 
-void AGameManager::SelectBuilding(FSPlacedBuilding building)
+void AGameManager::SelectBuilding(FSPlacedBuilding buildingToSelect)
 {
-	SelectedBuilding = building;
-	RefreshSelectionMenu(SelectedBuilding.Building->UpgradeCost.Count);
+	SelectedBuilding = buildingToSelect;
+	RefreshSelectionMenu(SelectedBuilding.Building->UpgradeCost.Count, SelectedBuilding.Building->IsUpgraded);
 }
 
 void AGameManager::DeselectBuilding()
 {
 	SelectedBuilding = FSPlacedBuilding(nullptr, 0, 0);
-	RefreshSelectionMenu(-1);
+	RefreshSelectionMenu(-1, false);
 }
 
 void AGameManager::AddResources(FSBuildingProcess process)

@@ -153,7 +153,7 @@ public:
 	FSPlacedBuilding SelectedBuilding;
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void RefreshSelectionMenu(int UpgradeCost);
+	void RefreshSelectionMenu(int UpgradeCost, bool isUpgraded);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void RefreshUI(int buildingAsInt);

@@ -97,6 +97,7 @@ public:
 
 	void Upgrade();
 
+	UPROPERTY(VisibleAnywhere)
 	bool IsUpgraded;
 
 protected:
