@@ -106,6 +106,7 @@ void AGameManager::FindEnvironmentalBuildings()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ClassToFind, FoundActors);
 
 	EnvironmentBuildings = TMap<FSGridPosition, FSPlacedBuilding>();
+	PlacedBuildings = TMap<FSGridPosition, FSPlacedBuilding>();
 
 	for (AActor* actor : FoundActors)
 	{
@@ -119,16 +120,31 @@ void AGameManager::FindEnvironmentalBuildings()
 		FSGridPosition gridPos = FSGridPosition::
 			GetPositionInGrid(GetActorLocation(), SnappedLocation, GridSize);
 
-		if (EnvironmentBuildings.Contains(gridPos))
-		{
-			actor->Destroy();
-			continue;
-		}
-
 		ABuildingBase* building = (ABuildingBase*)actor;
 
-		building->SetActorLocation(SnappedLocation);
-		EnvironmentBuildings.Add(gridPos, FSPlacedBuilding(building, gridPos));
+		if (building->GetClass() != BaseBuildingClass)
+		{
+			if (EnvironmentBuildings.Contains(gridPos))
+			{
+				actor->Destroy();
+				continue;
+			}
+
+			building->SetActorLocation(SnappedLocation);
+			EnvironmentBuildings.Add(gridPos, FSPlacedBuilding(building, gridPos));
+		}
+		else
+		{
+			if (PlacedBuildings.Contains(gridPos))
+			{
+				actor->Destroy();
+				continue;
+			}
+
+			building->SetActorLocation(SnappedLocation);
+			PlacedBuildings.Add(gridPos, FSPlacedBuilding(building, gridPos));
+		}
+		
 	}
 }
 
@@ -295,7 +311,7 @@ bool AGameManager::TryRemoveResources(FSBuildingProcess process)
 void AGameManager::DeleteSelectedBuilding()
 {
 	if (SelectedBuilding.Building == nullptr) return;
-
+	if (SelectedBuilding.Building->IsNotDeletable == true) return;
 	if (PlacedBuildings.Contains(SelectedBuilding.Position) == false) return;
 
 	PlacedBuildings.Remove(SelectedBuilding.Position);

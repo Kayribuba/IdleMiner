@@ -126,6 +126,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<ABuildingBase>> Stores;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ABuildingBase> BaseBuildingClass;
+
 	int StoreIndex;
 
 	UPROPERTY(EditAnywhere)
