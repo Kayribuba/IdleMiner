@@ -33,6 +33,8 @@ void ABuildingBase::SetActorHidden(bool setTo)
 void ABuildingBase::Upgrade()
 {
 	if (IsUpgraded) return;
+	if (IsNotDeletable) return;
+	if (IsNotUpgradable) return;
 
 	for (FSBuildingProcess process : UpgradeAddings)
 	{
